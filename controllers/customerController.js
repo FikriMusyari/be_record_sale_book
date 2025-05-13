@@ -1,4 +1,4 @@
-const pool = require('../config/db');
+const {prisma} = require('../config/db');
 
 exports.getAllCustomers = async (req, res) => {
   try {

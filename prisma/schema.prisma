@@ -1,0 +1,75 @@
+// schema prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Payment {
+  id     Int    @id @default(autoincrement())
+  method String 
+  queues Queue[]
+}
+
+model Status {
+  id    Int     @id @default(autoincrement())
+  name  String
+  queues Queue[]
+}
+
+model User {
+  id       Int       @id @default(autoincrement())
+  nama String  
+  email String    @unique
+  password String
+  customers Customer[]
+  products Product[]
+  queues   Queue[]
+}
+
+model Customer {
+  id       Int    @id @default(autoincrement())
+  name     String
+  balance  Decimal  @db.Decimal(10,2)
+  userId   Int
+  user     User  @relation(fields: [userId], references: [id])
+  queues   Queue[]
+}
+
+model Product {
+  id       Int    @id @default(autoincrement())
+  name     String
+  price    Float
+  userId   Int
+  user     User  @relation(fields: [userId], references: [id])
+  orders   ProductOrder[]
+}
+
+model Queue {
+  id         Int       @id @default(autoincrement())
+  customerId Int
+  statusId   Int
+  date       DateTime  @default(now())
+  paymentId  Int
+  note       String?
+  userId     Int
+  customer   Customer @relation(fields: [customerId], references: [id])
+  status     Status   @relation(fields: [statusId], references: [id])
+  payment    Payment  @relation(fields: [paymentId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+  orders     ProductOrder[]
+}
+
+model ProductOrder {
+  id          Int       @id @default(autoincrement())
+  queueId     Int
+  productId   Int
+  quantity    Int
+  discount    Decimal   @db.Decimal(10,2)
+  totalPrice  Decimal   @db.Decimal(10,2)
+  queue       Queue    @relation(fields: [queueId], references: [id])
+  product     Product  @relation(fields: [productId], references: [id])
+}
